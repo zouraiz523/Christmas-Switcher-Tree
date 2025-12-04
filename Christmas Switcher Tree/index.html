@@ -1,0 +1,215 @@
+<!DOCTYPE zouraiz>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Christmas Switcher Tree -zouraiz</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    
+  <div id="container">
+    <div class="star-glow"></div>
+    <div class="star"></div>
+    <div class="level" id="level-1">
+      <div class="circle"></div>
+    </div>
+    <div class="level" id="level-2">
+      <div class="circle"></div>
+      <div class="circle"></div>
+    </div>
+    <div class="level" id="level-3">
+      <div class="toggle-switch toggle-switch-s" data-size="70">
+        <div class="toggle-circle"></div>
+      </div>
+      <div class="circle"></div>
+    </div>
+    <div class="level" id="level-4">
+      <div class="circle"></div>
+      <div class="circle"></div>
+      <div class="toggle-switch toggle-switch-s" data-size="70">
+        <div class="toggle-circle"></div>
+      </div>
+    </div>
+    <div class="level" id="level-5">
+      <div class="circle"></div>
+      <div class="toggle-switch toggle-switch-l" data-size="110">
+        <div class="toggle-circle"></div>
+      </div>
+      <div class="circle"></div>
+    </div>
+    <div class="level" id="level-6">
+      <div class="toggle-switch toggle-switch-s" data-size="70">
+        <div class="toggle-circle"></div>
+      </div>
+      <div class="circle"></div>
+      <div class="toggle-switch toggle-switch-s" data-size="70">
+        <div class="toggle-circle"></div>
+      </div>
+      <div class="circle"></div>
+    </div>
+    <div class="level" id="level-7">
+      <div class="circle"></div>
+      <div class="toggle-switch toggle-switch-m" data-size="95">
+        <div class="toggle-circle"></div>
+      </div>
+      <div class="circle"></div>
+      <div class="circle"></div>
+      <div class="circle"></div>
+    </div>
+    <div class="level" id="level-8">
+      <div class="circle"></div>
+      <div class="circle"></div>
+      <div class="circle"></div>
+      <div class="circle"></div>
+      <div class="toggle-switch toggle-switch-l" data-size="110">
+        <div class="toggle-circle"></div>
+      </div>
+      <div class="circle"></div>
+    </div>
+    <div class="level" id="level-9">
+      <div class="toggle-switch toggle-switch-s" data-size="70">
+        <div class="toggle-circle"></div>
+      </div>
+      <div class="circle"></div>
+      <div class="circle"></div>
+      <div class="circle"></div>
+      <div class="circle"></div>
+      <div class="toggle-switch toggle-switch-m" data-size="95">
+        <div class="toggle-circle"></div>
+      </div>
+    </div>
+  </div>
+<script>
+        const COLORS = ["#c0392b", "#f8f9fa", "#d68910", "#0e6655", "#27ae60"];
+    const TOGGLE_CIRCLE_SIZE = 30;
+    const ANIMATION_INTERVAL = 1000;
+    const toggles = document.querySelectorAll(".toggle-switch");
+    const circles = document.querySelectorAll(".circle");
+    const container = document.getElementById("container");
+    let counter = 0;
+
+    // Store color pairs for each element
+    const circleColors = new Map();
+    const toggleBackgroundColors = new Map();
+    const toggleCircleColors = new Map();
+
+    const getTwoRandomColors = () => {
+      const first = Math.floor(Math.random() * COLORS.length);
+      let second = Math.floor(Math.random() * COLORS.length);
+      while (second === first) {
+        second = Math.floor(Math.random() * COLORS.length);
+      }
+      return [COLORS[first], COLORS[second]];
+    };
+
+    const getUniqueColorPairs = () => {
+      const pair1 = getTwoRandomColors();
+      let pair2 = getTwoRandomColors();
+      while (pair2.includes(pair1[0]) || pair2.includes(pair1[1])) {
+        pair2 = getTwoRandomColors();
+      }
+      return [pair1, pair2];
+    };
+
+    // Initialize colors for each circle element
+    circles.forEach((circle) => {
+      circleColors.set(circle, getTwoRandomColors());
+    });
+
+    toggles.forEach((toggle) => {
+      const [bgColors, circleColors] = getUniqueColorPairs();
+      toggleBackgroundColors.set(toggle, bgColors);
+      toggleCircleColors.set(toggle.querySelector(".toggle-circle"), circleColors);
+    });
+
+    // Create sparkles
+    const createSparkle = (x, y) => {
+      for (let i = 0; i < 5; i++) {
+        const sparkle = document.createElement("div");
+        sparkle.className = "sparkle";
+        const tx = (Math.random() - 0.5) * 50;
+        const ty = (Math.random() - 0.5) * 50;
+        sparkle.style.cssText = `
+          left: ${x}px;
+          top: ${y}px;
+          --tx: ${tx}px;
+          --ty: ${ty}px;
+        `;
+        container.appendChild(sparkle);
+        setTimeout(() => sparkle.remove(), 1500);
+      }
+    };
+
+    // Add click sparkle effect
+    circles.forEach((circle) => {
+      circle.addEventListener("click", (e) => {
+        createSparkle(e.clientX, e.clientY);
+      });
+    });
+
+    toggles.forEach((toggle) => {
+      toggle.addEventListener("click", (e) => {
+        createSparkle(e.clientX, e.clientY);
+      });
+    });
+
+    const animateToggles = () => {
+      toggles.forEach((toggle) => {
+        const toggleCircle = toggle.querySelector(".toggle-circle");
+        const size = parseInt(toggle.dataset.size);
+        const isLarge = toggle.classList.contains("toggle-switch-l");
+        const shouldToggle = isLarge ? counter % 2 === 0 : counter % 2 !== 0;
+        const translateX = shouldToggle ? size - TOGGLE_CIRCLE_SIZE : 0;
+        const bgColors = toggleBackgroundColors.get(toggle);
+        const circleColors = toggleCircleColors.get(toggleCircle);
+        const bgColorIdx = shouldToggle ? 1 : 0;
+        const circleColorIdx = counter % 2;
+        toggle.style.backgroundColor = bgColors[bgColorIdx];
+        toggleCircle.style.transform = `translateX(${translateX}px)`;
+        toggleCircle.style.backgroundColor = circleColors[circleColorIdx];
+      });
+    };
+
+    const animateCircles = () => {
+      circles.forEach((circle) => {
+        const colors = circleColors.get(circle);
+        const colorIdx = counter % 2;
+        circle.style.backgroundColor = colors[colorIdx];
+      });
+    };
+
+    const animate = () => {
+      counter++;
+      animateToggles();
+      animateCircles();
+    };
+
+    // Snowflakes
+    const createSnowflake = () => {
+      const snowflake = document.createElement("div");
+      snowflake.className = "snowflake";
+      snowflake.innerHTML = "❄";
+      snowflake.style.left = Math.random() * 100 + "vw";
+      snowflake.style.animationDuration = Math.random() * 3 + 5 + "s";
+      snowflake.style.fontSize = Math.random() * 10 + 10 + "px";
+      snowflake.style.opacity = Math.random() * 0.6 + 0.4;
+      container.appendChild(snowflake);
+      
+      setTimeout(() => {
+        snowflake.remove();
+      }, 8000);
+    };
+
+    // Create snowflakes periodically
+    setInterval(createSnowflake, 300);
+
+    // Initial animation
+    animate();
+
+    // Start interval
+    setInterval(animate, ANIMATION_INTERVAL);
+  
+</script>
+</body>
+</html>
